@@ -419,6 +419,71 @@ class FortiManager:
             url=self.base_url, json=payload, verify=self.verify)
         return get_address_objects.json()["result"]
 
+    def add_firewall_service_object(self, name, protocol=5, color=0, comment="",tcpportrange="",udpportrange="",icmpcode="",icmptype=""):
+        """
+        Create an service object using provided info
+        :param name: Enter object name that is to be created
+        :param protocol: 5 = TCP/UDP, 1 = ICMP
+        :param color: color id
+        :param comment: comment to assign to service
+        :param tcpportrange: tcpportrange
+        :param udpportrange: comment to assign to service
+        :param icmpcode: comment to assign to service
+        :param icmptype: comment to assign to service
+        :return: Response of status code with data in JSON Format
+        """
+        session = self.login()
+
+        data = {
+        "color": color,
+        "comment": comment,
+        "name": name,
+        "protocol": protocol
+        }
+        
+        if tcpportrange:
+            data["tcp-portrange"] = tcpportrange
+        if udpportrange:
+            data["udp-portrange"] = udpportrange
+        if (icmpcode and icmptype):
+            data["icmpcode"] = icmpcode
+            data["icmptype"] = icmptype
+            data["protocol"] = 1
+        
+        payload = {
+            "method": "add",
+            "params": [{"data": data,
+                "url": f"pm/config/adom/{self.adom}/obj/firewall/service/custom"}],
+            "session": self.sessionid}
+          
+        add_service_object = session.post(
+            url=self.base_url, json=payload, verify=self.verify)
+        return add_service_object.json()["result"]
+
+    def get_firewall_service_object(self, servicename=False):
+        """
+        Get the firewall service objects present in the policy package
+        :param servicename: Can filter and get the policy you want using servicename
+        :return: Response of status code with data in JSON Format
+        """
+        url = f"pm/config/adom/{self.adom}/obj/firewall/service/custom"
+        if servicename:
+            url = f"pm/config/adom/{self.adom}/obj/firewall/service/custom/{servicename}"
+        session = self.login()
+        payload = {
+            "method": "get",
+            "params": [
+                {
+                    "url": url
+                }
+            ],
+            "session": self.sessionid
+        }
+        get_firewall_service_object = session.post(
+            url=self.base_url, json=payload, verify=self.verify)
+        return get_firewall_service_object.json()["result"]
+        
+        
     def add_firewall_address_object(self, name, subnet: list, associated_interface="any", object_type=0,
                                     allow_routing=0):
         """
