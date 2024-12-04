@@ -419,26 +419,96 @@ class FortiManager:
             url=self.base_url, json=payload, verify=self.verify)
         return get_address_objects.json()["result"]
 
-    def add_firewall_address_object(self, name, subnet: list, associated_interface="any", object_type=0,
-                                    allow_routing=0):
+    def add_firewall_service_object(self, name, protocol=5, color=0, comment="",tcpportrange="",udpportrange="",icmpcode="",icmptype=""):
+        """
+        Create an service object using provided info
+        :param name: Enter object name that is to be created
+        :param protocol: 5 = TCP/UDP, 1 = ICMP
+        :param color: color id
+        :param comment: comment to assign to service
+        :param tcpportrange: tcpportrange
+        :param udpportrange: comment to assign to service
+        :param icmpcode: comment to assign to service
+        :param icmptype: comment to assign to service
+        :return: Response of status code with data in JSON Format
+        """
+        session = self.login()
+
+        data = {
+        "color": color,
+        "comment": comment,
+        "name": name,
+        "protocol": protocol
+        }
+        
+        if tcpportrange:
+            data["tcp-portrange"] = tcpportrange
+        if udpportrange:
+            data["udp-portrange"] = udpportrange
+        if (icmpcode and icmptype):
+            data["icmpcode"] = icmpcode
+            data["icmptype"] = icmptype
+            data["protocol"] = 1
+        
+        payload = {
+            "method": "add",
+            "params": [{"data": data,
+                "url": f"pm/config/adom/{self.adom}/obj/firewall/service/custom"}],
+            "session": self.sessionid}
+          
+        add_service_object = session.post(
+            url=self.base_url, json=payload, verify=self.verify)
+        return add_service_object.json()["result"]
+
+    def get_firewall_service_object(self, servicename=False):
+        """
+        Get the firewall service objects present in the policy package
+        :param servicename: Can filter and get the policy you want using servicename
+        :return: Response of status code with data in JSON Format
+        """
+        url = f"pm/config/adom/{self.adom}/obj/firewall/service/custom"
+        if servicename:
+            url = f"pm/config/adom/{self.adom}/obj/firewall/service/custom/{servicename}"
+        session = self.login()
+        payload = {
+            "method": "get",
+            "params": [
+                {
+                    "url": url
+                }
+            ],
+            "session": self.sessionid
+        }
+        get_firewall_service_object = session.post(
+            url=self.base_url, json=payload, verify=self.verify)
+        return get_firewall_service_object.json()["result"]
+        
+        
+    def add_firewall_address_object(self, name, subnet=[], associated_interface="any", object_type=0,allow_routing=0,fqdn=""):
         """
         Create an address object using provided info
         :param name: Enter object name that is to be created
         :param associated_interface: Provide interface to which this object belongs if any. {Default is kept any}
         :param subnet: Enter the subnet in a list format eg.["1.1.1.1", "255.255.255.255"]
-        :param object_type:
+        :param object_type: 0: IPv4 address, 2: FQDN
         :param allow_routing: Set routing if needed
         :return: Response of status code with data in JSON Format
         """
+        data = {"allow-routing": allow_routing,
+                "associated-interface": associated_interface,
+                "name": name,
+                "type": object_type}
+        
+        if(object_type==0):
+                data["subnet"] = subnet
+                
+        elif (object_type==2):
+                data["fqdn"] = fqdn
+                
         session = self.login()
         payload = {
             "method": "add",
-            "params": [{"data": {
-                "allow-routing": allow_routing,
-                "associated-interface": associated_interface,
-                "name": name,
-                "subnet": subnet,
-                "type": object_type},
+            "params": [{"data": data,
                 "url": f"pm/config/adom/{self.adom}/obj/firewall/address"}],
             "session": self.sessionid}
 
