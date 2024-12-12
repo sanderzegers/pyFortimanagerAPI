@@ -173,7 +173,7 @@ class FortiManager:
         payload.update({"session": self.sessionid})
         get_devices = session.post(
             url=self.base_url, json=payload, verify=False)
-        return get_devices.json()
+        return get_devices.json()["result"]
 
     def add_device(self, ip_address, username, password, name, description=False):
         session = self.login()
@@ -189,7 +189,7 @@ class FortiManager:
         payload.update({"session": self.sessionid})
         add_device = session.post(
             url=self.base_url, json=payload, verify=self.verify)
-        return add_device.json()
+        return add_device.json()["result"]
 
     def add_model_device(self, name, serial_no, username="admin", password="", os_ver=6, mr=4, os_type="fos",
                          platform=""):
@@ -1823,7 +1823,7 @@ class FortiManager:
         payload.update({"session": self.sessionid})
         get_device = session.post(
             url=self.base_url, json=payload, verify=False)
-        return get_device.json()
+        return get_device.json()["result"]
 
     def create_script_group(self, name: str, target: int = 0):
         """
