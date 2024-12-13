@@ -1745,6 +1745,18 @@ class FortiManager:
                    }
         create_zone = session.post(url=self.base_url, json=payload, verify=False)
         return create_zone.json()["result"]
+    
+    def get_sdwan(self, device_name, vdom):
+        session = self.login()
+        payload = {"method": "get",
+                   "params": [
+                       {"url": f"pm/config/device/{device_name}/vdom/{vdom}/system/sdwan"}
+                   ],
+                   "session": self.sessionid
+                   }
+        get_sdwan = session.post(url=self.base_url, json=payload, verify=False)
+        return get_sdwan.json()["result"]
+
 
     def get_zones(self, device_name, vdom):
         session = self.login()
