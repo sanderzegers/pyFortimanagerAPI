@@ -1382,6 +1382,7 @@ class FortiManager:
                 "name": "name",
                 "source_interface": "srcintf",
                 "source_address": "srcaddr",
+                "inspection_mode": "inspection-mode",
                 "destination_interface": "dstintf",
                 "destination_address": "dstaddr",
                 "service": "service",
