@@ -1054,6 +1054,15 @@ class FortiManager:
         payload.update(session=self.sessionid)
         req = session.post(url=self.base_url, json=payload, verify=self.verify)
         return req.json()["result"]
+    
+    # Routing
+
+    def get_router(self, routing_protocol, device, vdom):
+        session = self.login()
+        payload = {"method": "get", "params": [{"url": f"pm/config/device/{device}/vdom/{vdom}/router/{routing_protocol}"}]}
+        payload.update(session=self.sessionid)
+        req = session.post(url=self.base_url, json=payload, verify=self.verify)
+        return req.json()["result"]
 
     # Firewall Interfaces
     def get_interfaces(self, device):
@@ -1143,7 +1152,7 @@ class FortiManager:
 
     def add_firewall_policy(self, policy_package_name: str, name: str, source_interface: str,
                             source_address: str, destination_interface: str, destination_address: str,
-                            service: str, nat='disable', schedule="always", action=1, logtraffic=2):
+                            service: str, profile_group=None,profile_type=None, utm_status="disable", nat='disable', schedule="always", action=1, logtraffic=2):
         """
         Create your own policy in FortiManager using the instance parameters.
         :param policy_package_name: Enter the name of the policy package                eg. "default"
@@ -1177,13 +1186,20 @@ class FortiManager:
                         "srcaddr": source_address,
                         "srcintf": source_interface,
                         "action": action,
-                        "nat": nat
+                        "nat": nat,
+                        "profile-protocol-options": None,
+                        "ssl-ssh-profile": None,
+                        "profile-type": profile_type,
+                        "profile-group": profile_group,
+                        "utm-status" : utm_status
+                        
                     },
                     "url": f"pm/config/adom/{self.adom}/pkg/{policy_package_name}/firewall/policy/"
                 }
             ],
             "session": self.sessionid
         }
+        print(payload)
         add_policy = session.post(
             url=self.base_url, json=payload, verify=self.verify)
         return add_policy.json()
